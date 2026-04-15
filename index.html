@@ -14,7 +14,6 @@
             --text-primary: #ffffff;
             --text-secondary: #708499;
             --accent: #0098ea;
-            --danger: #ff5e57;
             --card-radius: 16px;
         }
 
@@ -41,7 +40,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--bg-primary);
             z-index: 10;
         }
         .header-left { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
@@ -62,12 +60,12 @@
         }
         .tab-content.active { display: block; }
 
-        /* WALLET */
-        .balance-section { text-align: center; margin: 24px 0 32px; }
+        /* BALANCE */
+        .balance-section { text-align: center; margin: 24px 0 32px; cursor: pointer; }
         .balance-amount { font-size: 48px; font-weight: 800; margin-bottom: 4px; }
         .wallet-address { font-size: 13px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; display: inline-block; }
 
-        /* BUTTONS */
+        /* ACTIONS */
         .action-buttons { display: flex; justify-content: space-evenly; padding: 0 16px; margin-bottom: 32px; }
         .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
         .action-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; font-size: 22px; color: var(--accent); }
@@ -75,8 +73,8 @@
 
         /* LIST */
         .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 12px; overflow: hidden; }
-        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; overflow: hidden; }
+        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; }
         .item-icon img { width: 100%; height: 100%; object-fit: cover; }
         .item-info { flex: 1; }
         .item-title { font-weight: 600; font-size: 16px; }
@@ -99,7 +97,7 @@
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; z-index: 200; }
         .modal-overlay.show { display: flex; }
-        .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px; transform: translateY(100%); transition: 0.3s ease; }
+        .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px; transform: translateY(100%); transition: transform 0.3s ease; }
         .modal-overlay.show .modal-content { transform: translateY(0); }
     </style>
 </head>
@@ -108,39 +106,39 @@
     <div class="header">
         <div class="header-left">Tonkeeper <i class="fas fa-check-circle verified-badge"></i></div>
         <div class="user-selector" onclick="triggerHaptic('light')">kla1mu <i class="fas fa-chevron-down" style="font-size: 10px;"></i></div>
-        <div class="header-right" onclick="triggerHaptic('medium')"><i class="fas fa-cog"></i></div>
+        <div class="header-right"><i class="fas fa-cog" style="color: var(--text-secondary);"></i></div>
     </div>
 
     <div id="tab-wallet" class="tab-content active">
-        <div class="balance-section">
-            <div class="balance-amount" id="mainBalance" onclick="editBalance()">$0</div>
+        <div class="balance-section" onclick="editBalance()">
+            <div class="balance-amount" id="mainBalance">$0</div>
             <div class="wallet-address">UQDt...n1Jz</div>
         </div>
 
         <div class="action-buttons">
-            <div class="action-btn" onclick="openModal('modal-action')"><div class="action-circle"><i class="fas fa-plus"></i></div><span>Buy</span></div>
-            <div class="action-btn" onclick="openModal('modal-action')"><div class="action-circle"><i class="fas fa-arrow-up"></i></div><span>Send</span></div>
-            <div class="action-btn" onclick="openModal('modal-action')"><div class="action-circle"><i class="fas fa-arrow-down"></i></div><span>Receive</span></div>
-            <div class="action-btn" onclick="openModal('modal-action')"><div class="action-circle"><i class="fas fa-exchange-alt"></i></div><span>Swap</span></div>
+            <div class="action-btn" onclick="openModal()"><div class="action-circle"><i class="fas fa-plus"></i></div><span>Buy</span></div>
+            <div class="action-btn" onclick="openModal()"><div class="action-circle"><i class="fas fa-arrow-up"></i></div><span>Send</span></div>
+            <div class="action-btn" onclick="openModal()"><div class="action-circle"><i class="fas fa-arrow-down"></i></div><span>Receive</span></div>
+            <div class="action-btn" onclick="openModal()"><div class="action-circle"><i class="fas fa-exchange-alt"></i></div><span>Swap</span></div>
         </div>
 
         <div class="list-container">
-            <div class="list-item" onclick="triggerHaptic('light')">
-                <div class="item-icon"><img src="https://i.ibb.co/FkGLqhjK/ton-logo.png" alt="TON"></div>
+            <div class="list-item">
+                <div class="item-icon"><img src="https://i.ibb.co/FkGLqhjK/image.png" alt="TON"></div>
                 <div class="item-info"><div class="item-title">TON</div><div class="item-sub">$5.24</div></div>
                 <div style="text-align: right;"><div class="item-title">0</div><div class="item-sub">$0</div></div>
             </div>
-            <div class="list-item" onclick="triggerHaptic('light')">
-                <div class="item-icon"><img src="https://i.ibb.co/h1g3RwmB/usdt-logo.png" alt="USDT"></div>
+            <div class="list-item">
+                <div class="item-icon"><img src="https://i.ibb.co/h1g3RwmB/image.png" alt="USDT"></div>
                 <div class="item-info"><div class="item-title">USDT</div><div class="item-sub">Tether</div></div>
                 <div style="text-align: right;"><div class="item-title">0</div><div class="item-sub">$0</div></div>
             </div>
         </div>
     </div>
 
-    <div id="tab-history" class="tab-content"><p style="text-align:center; margin-top:50px; color:var(--text-secondary);">No history</p></div>
-    <div id="tab-browser" class="tab-content"><p style="text-align:center; margin-top:50px; color:var(--text-secondary);">Browser empty</p></div>
-    <div id="tab-settings" class="tab-content"><p style="text-align:center; margin-top:50px; color:var(--text-secondary);">Settings</p></div>
+    <div id="tab-history" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">No history</p></div>
+    <div id="tab-browser" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">Browser is empty</p></div>
+    <div id="tab-settings" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">Settings</p></div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('wallet', this)"><i class="fas fa-wallet nav-icon"></i><span class="nav-label">Wallet</span></div>
@@ -149,12 +147,12 @@
         <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cog nav-icon"></i><span class="nav-label">Settings</span></div>
     </div>
 
-    <div class="modal-overlay" id="modal-action" onclick="closeModal()">
+    <div class="modal-overlay" id="modal-info" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 0 auto 20px;"></div>
-            <h2 style="margin-bottom: 16px; text-align: center;">Action</h2>
-            <p style="text-align: center; color: var(--text-secondary);">This feature will be available soon.</p>
-            <button onclick="closeModal()" style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 600;">Close</button>
+            <h2 style="margin-bottom: 12px; text-align: center;">Coming Soon</h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">This feature is currently under development.</p>
+            <button onclick="closeModal()" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 700;">OK</button>
         </div>
     </div>
 
@@ -166,30 +164,30 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
         }
 
-        function switchTab(id, el) {
+        window.switchTab = function(id, el) {
             triggerHaptic('light');
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
             el.classList.add('active');
-        }
+        };
 
-        function openModal(id) {
+        window.openModal = function() {
             triggerHaptic('medium');
-            document.getElementById(id).classList.add('show');
-        }
+            document.getElementById('modal-info').classList.add('show');
+        };
 
-        function closeModal() {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
-        }
+        window.closeModal = function() {
+            document.getElementById('modal-info').classList.remove('show');
+        };
 
-        function editBalance() {
+        window.editBalance = function() {
             triggerHaptic('selection_change');
-            const val = prompt("Set balance:", "100");
+            const val = prompt("Enter balance ($):", "100");
             if (val !== null) {
                 document.getElementById('mainBalance').innerText = "$" + Number(val).toLocaleString();
             }
-        }
+        };
     </script>
 </body>
 </html>
