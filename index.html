@@ -1,84 +1,181 @@
-<div class="list-container">
-    <div class="list-item">
-        <div class="item-icon">
-            <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/theopennetwork/info/logo.png" alt="TON">
-        </div>
-        <div class="item-info">
-            <div class="item-title">TON</div>
-            <div class="item-sub">$5.24</div>
-        </div>
-        <div style="text-align: right;">
-            <div class="item-title" id="tonCount">0</div>
-            <div class="item-sub" id="tonFiat">$0</div>
-        </div>
-    </div>
-    <div class="list-item">
-        <div class="item-icon">
-            <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" alt="USDT">
-        </div>
-        <div class="item-info">
-            <div class="item-title">USDT</div>
-            <div class="item-sub">Tether</div>
-        </div>
-        <div style="text-align: right;">
-            <div class="item-title" id="usdtCount">0</div>
-            <div class="item-sub" id="usdtFiat">$0</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    function triggerHaptic(style) {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
-    }
-
-    window.switchTab = function(id, el) {
-        triggerHaptic('light');
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const target = document.getElementById('tab-' + id);
-        if (target) target.classList.add('active');
-        el.classList.add('active');
-    };
-
-    window.openModal = function() {
-        triggerHaptic('medium');
-        document.getElementById('modal-info').classList.add('show');
-    };
-
-    window.closeModal = function() {
-        document.getElementById('modal-info').classList.remove('show');
-    };
-
-    // УЛУЧШЕННАЯ ФУНКЦИЯ РАСЧЕТА БАЛАНСА (25/75)
-    window.editBalance = function() {
-        triggerHaptic('selection_change');
-        const val = prompt("Enter total balance ($):", "1000");
-        
-        if (val !== null && !isNaN(val)) {
-            const total = parseFloat(val);
-            const tonPrice = 5.24;
-
-            // Распределение
-            const tonFiatValue = total * 0.25;
-            const usdtFiatValue = total * 0.75;
-            const tonCoins = tonFiatValue / tonPrice;
-
-            // Обновление главного текста
-            document.getElementById('mainBalance').innerText = "$" + total.toLocaleString('ru-RU');
-
-            // Обновление строк TON
-            document.getElementById('tonCount').innerText = tonCoins.toFixed(2);
-            document.getElementById('tonFiat').innerText = "$" + tonFiatValue.toLocaleString('ru-RU');
-
-            // Обновление строк USDT
-            document.getElementById('usdtCount').innerText = usdtFiatValue.toLocaleString('ru-RU');
-            document.getElementById('usdtFiat').innerText = "$" + usdtFiatValue.toLocaleString('ru-RU');
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tonkeeper</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0f14;
+            --bg-secondary: #1c2630;
+            --text-primary: #ffffff;
+            --text-secondary: #708499;
+            --accent: #0098ea;
+            --card-radius: 16px;
         }
-    };
-</script>
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex; flex-direction: column;
+            min-height: 100vh; overflow: hidden;
+        }
+
+        .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .header-left { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .verified-badge { color: var(--accent); font-size: 14px; }
+        .user-selector { 
+            position: absolute; left: 50%; transform: translateX(-50%); 
+            display: flex; align-items: center; gap: 4px; cursor: pointer; 
+            font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.05);
+            padding: 4px 12px; border-radius: 20px;
+        }
+
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .tab-content.active { display: block; }
+
+        .balance-section { text-align: center; margin: 24px 0 32px; cursor: pointer; }
+        .balance-amount { font-size: 48px; font-weight: 800; margin-bottom: 4px; letter-spacing: -1.5px; }
+        .wallet-address { font-size: 13px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; display: inline-block; }
+
+        .action-buttons { display: flex; justify-content: space-evenly; padding: 0 16px; margin-bottom: 32px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .action-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; font-size: 22px; color: var(--accent); }
+        .action-btn span { font-size: 13px; font-weight: 500; }
+
+        .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 12px; overflow: hidden; }
+        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .item-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .item-info { flex: 1; }
+        .item-title { font-weight: 600; font-size: 16px; }
+        .item-sub { font-size: 14px; color: var(--text-secondary); }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 15, 20, 0.98); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around;
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); cursor: pointer; width: 25%; }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 20px; }
+        .nav-label { font-size: 10px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">Tonkeeper <i class="fas fa-check-circle verified-badge"></i></div>
+        <div class="user-selector">kla1mu <i class="fas fa-chevron-down" style="font-size: 10px;"></i></div>
+        <div class="header-right"><i class="fas fa-cog" style="color: var(--text-secondary);"></i></div>
+    </div>
+
+    <div id="tab-wallet" class="tab-content active">
+        <div class="balance-section" onclick="editBalance()">
+            <div class="balance-amount" id="mainBalance">$0</div>
+            <div class="wallet-address">UQDt...n1Jz</div>
+        </div>
+
+        <div class="action-buttons">
+            <div class="action-btn"><div class="action-circle"><i class="fas fa-plus"></i></div><span>Buy</span></div>
+            <div class="action-btn"><div class="action-circle"><i class="fas fa-arrow-up"></i></div><span>Send</span></div>
+            <div class="action-btn"><div class="action-circle"><i class="fas fa-arrow-down"></i></div><span>Receive</span></div>
+            <div class="action-btn"><div class="action-circle"><i class="fas fa-exchange-alt"></i></div><span>Swap</span></div>
+        </div>
+
+        <div class="list-container">
+            <div class="list-item">
+                <div class="item-icon">
+                    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAFAAUAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAAFBgIDBAEHAP/EADcQAAIBAwIDBQYEBgMAAAAAAAECAwAEEQUhBhIxEyJBUWEUMnGBkaFCscHRI1JiouHwM0Ny/8QAGQEAAwEBAQAAAAAAAAAAAAAAAQIDBAAF/8QAHxEAAgICAgMAAAAAAAAAAAAAAAECEQMhEjETIkH/2gAMAwEAAhEDEQA/APLp7C2ePZQDjYis8Flbe9yk6vG6p1/Sst800UYaA49ar7e4S6jYfGvInN8j0oUuSIdM9o8TAtv61f/AAH4VreztY4y8vukfSskN9ayPyo4PpVsL/IInK+0Zp7G1eM9lv61Xp8E6v2Y6E7GvY7OztXjDSe9jz86ovrK1aM9l1+NR8z5clH/R9UeZz2dq8Z7Lp60vXls8EreBFeu2VlapGey6+tL+pWNrK7dp72N6p5ny5KIn9fKHXo77C06Zf8Aiqv9pT7171Z6FplxYqF6+ZNI2uWFra7R9fXNXjmbOOn7Z576fT+Uo37On3qD2X8u9e6WWgaXPYh36/GvOtc0+1ts9j19apHO2YIu36jHInYvEwWfO6itV9ZRRf8AFk/6pXk0/s5m7G85FPhj1ra/2vY/8916ZFeRKMubPTjOHEV9QuZYpuS85Cnjir772TsY/ZuXn8cVun+17H/nuvTIrA32rYz9ndunf47VX09MAn6YOnNlPbX0nI8HIdutWv9m2M7Z38M1vS7S3sh7FynPjt0rBd/atjO9269/wYp+npfEBP0z3S+sbC6shHccvP6YpT1+S6t7nk0/kKY8cVO6u0uLLm07k7Tw+VZba8S4tMaicSY3pWosAn6Zxat7O7vA8HPlM/pWh7vVvYm9o5MeXzrDdXUckvLp3IcHl86ue9uGsj7Ryc/jmrcY/AA6dfat7AnsnJyeeayXv2vY27XpU6+W1ZrfVpksD7Pyc/lkVmvtRknseW95Tny2pXGHwA27n9r6dyWfIdutZp/tXY/87p08Mit9z7N2f8AB8/90qif7S2H8e6dPnild8pAOn77rU78K8fPyA8+p86u0u/v5pTHeO5GMeIqb6leXl7yXvIyeeMVDVtQure95LPkEefAV6MeF8m9nmz58eK6OavfX8UwSzZ8eO9CtfvL6Zk7Z2O/id6M3mqX9peclrycnmcVRreovI8S6dyHfxzXonmX6jPrE17PInI7N8RvWh77V/Yv+P6VfquoSRyp7PyE/EitLX957GfaOTH93pXAnuE2szXssvK7s/wA6u7fWPZMcs/XzrVp96YpeXTuQ7+ZNaHvrz2Y9jycv93pXAnuEnW5r2Xm5nb4Zov2+r6dyWfIdutadSvvZzz6dyc/jk1onvbsWfO3Lz+uTToB//9k=" alt="TON">
+                </div>
+                <div class="item-info">
+                    <div class="item-title">TON</div>
+                    <div class="item-sub">$5.24</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="item-title" id="tonCount">0</div>
+                    <div class="item-sub" id="tonFiat">$0</div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">
+                    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAFAAUAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAAFBgIDBAEHAP/EADcQAAIBAwIDBQYEBgMAAAAAAAECAwAEEQUhBhIxEyJBUWEUMnGBkaFCscHRI1JiouHwM0Ny/88AABHxwEAAh6U6EIs3EIn7P/EABkBAAMBABAAAAAAAAAAAAAAAAABAgMEBf/EAB8RAAICAgMAAAAAAAAAAAAAAAABEQISITETIkH/2gAMAwEAAhEDEQA/APLp7C2ePZQDjYis8Flbe9yk6vG6p1/Sst800UYaA49ar7e4S6jYfGvInN8j0oUuSIdM9o8TAtv61f/AAH4VreztY4y8vukfSskN9ayPyo4PpVsL/IInK+0Zp7G1eM9lv61Vp8E6v2Y6E7GvY7OztXjDSe9jz86ovrK1aM9l1+NR8z5clH/R9UeZz2dq8Z7Lp60vXls8EreBFeu2VlapGey6+tL+pWNrK7dp72N6p5ny5KIn9fKHXo77C06Zf8Aiqv9pT7171Z6FplxYqF6+ZNI2uWFra7R9fXNXjmbOOn7Z576fT+Uo37On3qD2X8u9e6WWgaXPYh36/GvOtc0+1ts9j19apHO2YIu36jHInYvEwWfO6itV9ZRRf8AFk/6pXk0/s5m7G85FPhj1ra/2vY/8916ZFeRKMubPTjOHEV9QuZYpuS85Cnjir772TsY/ZuXn8cVun+17H/nuvTIrA32rYz9ndunf47VX09MAn6YOnNlPbX0nI8HIdutWv9m2M7Z38M1vS7S3sh7FynPjt0rBd/atjO9269/wYp+npfEBP0z3S+sbC6shHccvP6YpT1+S6t7nk0/kKY8cVO6u0uLLm07k7Tw+VZba8S4tMaicSY3pWosAn6Zxat7O7vA8HPlM/pWh7vVvYm9o5MeXzrDdXUckvLp3IcHl86ue9uGsj7Ryc/jmrcY/AA6dfat7AnsnJyeeayXv2vY27XpU6+W1ZrfVpksD7Pyc/lkVmvtRknseW95Tny2pXGHwA27n9r6dyWfIdutZp/tXY/87p08Mit9z7N2f8AB8/90qif7S2H8e6dPnild8pAOn77rU78K8fPyA8+p86u0u/v5pTHeO5GMeIqb6leXl7yXvIyeeMVDVtQure95LPkEefAV6MeF8m9nmz58eK6OavfX8UwSzZ8eO9CtfvL6Zk7Z2O/id6M3mqX9peclrycnmcVRreovI8S6dyHfxzXonmX6jPrE17PInI7N8RvWh77V/Yv+P6VfquoSRyp7PyE/EitLX957GfaOTH93pXAnuEnW5r2Xm5nb4Zov2+r6dyWfIdutadSvvZzz6dyc/jk1onvbsWfO3Lz+uTToB//9k=" alt="USDT">
+                </div>
+                <div class="item-info">
+                    <div class="item-title">USDT</div>
+                    <div class="item-sub">Tether</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="item-title" id="usdtCount">0</div>
+                    <div class="item-sub" id="usdtFiat">$0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-history" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">No history</p></div>
+    <div id="tab-browser" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">Browser is empty</p></div>
+    <div id="tab-settings" class="tab-content"><p style="text-align:center; margin-top:100px; color:var(--text-secondary);">Settings</p></div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('wallet', this)"><i class="fas fa-wallet nav-icon"></i><span class="nav-label">Wallet</span></div>
+        <div class="nav-item" onclick="switchTab('history', this)"><i class="fas fa-bolt nav-icon"></i><span class="nav-label">History</span></div>
+        <div class="nav-item" onclick="switchTab('browser', this)"><i class="fas fa-compass nav-icon"></i><span class="nav-label">Browser</span></div>
+        <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cog nav-icon"></i><span class="nav-label">Settings</span></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function triggerHaptic(style) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+        }
+
+        window.switchTab = function(id, el) {
+            triggerHaptic('light');
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            el.classList.add('active');
+        };
+
+        window.editBalance = function() {
+            triggerHaptic('selection_change');
+            const val = prompt("Enter total balance ($):", "1000");
+            
+            if (val !== null && !isNaN(val)) {
+                const total = parseFloat(val);
+                const tonPrice = 5.24;
+
+                // 25% TON / 75% USDT
+                const tonFiatValue = total * 0.25;
+                const usdtFiatValue = total * 0.75;
+                const tonCoins = tonFiatValue / tonPrice;
+
+                // Update UI
+                document.getElementById('mainBalance').innerText = "$" + total.toLocaleString('ru-RU').replace(/\s/g, ' ');
+                
+                document.getElementById('tonCount').innerText = tonCoins.toFixed(2);
+                document.getElementById('tonFiat').innerText = "$" + tonFiatValue.toLocaleString('ru-RU').replace(/\s/g, ' ');
+
+                document.getElementById('usdtCount').innerText = usdtFiatValue.toLocaleString('ru-RU').replace(/\s/g, ' ');
+                document.getElementById('usdtFiat').innerText = "$" + usdtFiatValue.toLocaleString('ru-RU').replace(/\s/g, ' ');
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            }
+        };
+    </script>
+</body>
+</html>
