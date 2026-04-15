@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #0a0f14; --card: #1c2630; --text: #fff; --sub: #708499; --accent: #0098ea; --success: #4cd964; }
+        :root { --bg: #0a0f14; --card: #1c2630; --text: #fff; --sub: #708499; --accent: #0098ea; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
+        /* Header */
         .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .user-selector { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 
@@ -31,14 +32,13 @@
         .icon-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent); }
 
         /* Список */
-        .list { background: var(--card); border-radius: 16px; margin: 0 16px 15px; overflow: hidden; }
+        .list { background: var(--card); border-radius: 16px; margin: 0 16px; overflow: hidden; }
         .item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
         .item-info { flex: 1; }
         .item-name { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
         .item-sub { font-size: 13px; color: var(--sub); }
         .item-val { text-align: right; font-weight: 700; letter-spacing: -0.5px; }
-        .status-up { color: var(--success); }
 
         /* Навигация */
         .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0 30px; background: rgba(10,15,20,0.98); border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; }
@@ -71,14 +71,14 @@
         <div class="list">
             <div class="item">
                 <div class="item-icon">
-                    <svg viewBox="0 0 100 100" width="40"><circle cx="50" cy="50" r="50" fill="#0098ea"/><path d="M30 40c0-10 5-15 15-15h10c10 0 15 5 15 15v20c0 10-5 15-15 15H45c-10 0-15-5-15-15V40z" fill="none" stroke="#fff" stroke-width="6"/><path d="M42 45h16M42 55h16" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+                    <svg viewBox="0 0 100 100" width="40" height="40"><circle cx="50" cy="50" r="50" fill="#0098ea"/><path d="M30 40c0-10 5-15 15-15h10c10 0 15 5 15 15v20c0 10-5 15-15 15H45c-10 0-15-5-15-15V40z" fill="none" stroke="#fff" stroke-width="6"/><path d="M42 45h16M42 55h16" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
                 </div>
                 <div class="item-info"><div class="item-name">TON</div><div class="item-sub">$5.24</div></div>
                 <div class="item-val"><div id="tC">0</div><div class="item-sub" id="tF">$0</div></div>
             </div>
             <div class="item">
                 <div class="item-icon">
-                    <svg viewBox="0 0 100 100" width="40"><circle cx="50" cy="50" r="50" fill="#26a17b"/><path d="M35 40h30M50 40v35M40 75h20" stroke="#fff" stroke-width="7" stroke-linecap="round"/><ellipse cx="50" cy="40" rx="20" ry="10" fill="none" stroke="#fff" stroke-width="6"/></svg>
+                    <svg viewBox="0 0 100 100" width="40" height="40"><circle cx="50" cy="50" r="50" fill="#26a17b"/><path d="M35 40h30M50 40v35M40 75h20" stroke="#fff" stroke-width="7" stroke-linecap="round"/><ellipse cx="50" cy="40" rx="20" ry="10" fill="none" stroke="#fff" stroke-width="6"/></svg>
                 </div>
                 <div class="item-info"><div class="item-name">USDT</div><div class="item-sub">Tether</div></div>
                 <div class="item-val"><div id="uC">0</div><div class="item-sub" id="uF">$0</div></div>
@@ -86,16 +86,7 @@
         </div>
     </div>
 
-    <div id="history" class="tab-content">
-        <div style="padding: 20px 16px; font-weight: 800; font-size: 22px;">History</div>
-        <div class="list">
-            <div class="item">
-                <div class="item-icon" style="background:#222; display:flex; align-items:center; justify-content:center; color:var(--success)"><i class="fas fa-arrow-down"></i></div>
-                <div class="item-info"><div class="item-name">Received</div><div class="item-sub">From UQBy...82x</div></div>
-                <div class="item-val"><div class="status-up" id="histTon">+0 TON</div><div class="item-sub" id="histFiat">+$0</div></div>
-            </div>
-        </div>
-    </div>
+    <div id="history" class="tab-content"><div style="padding:20px; text-align:center; color:var(--sub)">History is empty</div></div>
 
     <div class="nav">
         <div class="nav-item active" onclick="showTab('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
@@ -117,29 +108,26 @@
         }
 
         window.editBalance = () => {
-            let v = prompt("Сумма ($):");
+            let v = prompt("Введите сумму ($):");
             if (!v) return;
             let total = parseFloat(v.replace(/\s/g, '').replace(',', '.'));
             if (isNaN(total)) return;
 
+            // Расчет (25% TON, 75% USDT)
             let tonPart = total * 0.25;
             let usdtPart = total * 0.75;
-            let tCount = (tonPart / 5.24).toFixed(2);
             
+            // Форматирование с пробелом
             let fTotal = total.toLocaleString('ru-RU').replace(/\s/g, ' ');
             let fTonP = tonPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
             let fUsdtP = usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
 
-            // Обновляем кошелек
+            // Обновление интерфейса
             document.getElementById('mainB').innerHTML = `<span>$</span>${fTotal}`;
-            document.getElementById('tC').innerText = tCount;
+            document.getElementById('tC').innerText = (tonPart / 5.24).toFixed(2);
             document.getElementById('tF').innerText = "$" + fTonP;
             document.getElementById('uC').innerText = fUsdtP;
             document.getElementById('uF').innerText = "$" + fUsdtP;
-
-            // Обновляем историю (для красоты)
-            document.getElementById('histTon').innerText = `+${tCount} TON`;
-            document.getElementById('histFiat').innerText = `+$${fTonP}`;
 
             if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         };
