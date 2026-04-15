@@ -1,69 +1,197 @@
 <!DOCTYPE html>
-<html lang="ru" style="--tg-viewport-height: 100vh;">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Wallet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tonkeeper Clone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-primary: #0a0f14;
+            --bg-secondary: #1c2630;
+            --text-primary: #ffffff;
+            --text-secondary: #708499;
+            --accent: #0098ea;
+            --danger: #ff5e57;
+            --card-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-primary);
+            z-index: 10;
+        }
+        .header-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .verified-badge { color: var(--text-secondary); font-size: 14px; }
+        .user-selector { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px; font-weight: 600; }
+
+        /* Вкладки */
+        .tab-content {
+            display: none;
+            padding-bottom: 100px;
+            animation: fadeIn 0.2s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Кошелек */
+        .balance-section { text-align: center; margin: 30px 0 40px; }
+        .balance-amount { font-size: 44px; font-weight: 700; margin-bottom: 8px; cursor: pointer; }
+        .wallet-address { font-size: 13px; color: var(--text-secondary); font-family: monospace; }
+
+        .action-buttons { display: flex; justify-content: space-around; padding: 0 16px; margin-bottom: 32px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .action-circle { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; justify-content: center; align-items: center; font-size: 20px; }
+        .action-btn span { font-size: 12px; }
+
+        .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 20px; overflow: hidden; }
+        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .item-icon { width: 36px; height: 36px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .item-icon img { width: 100%; height: 100%; }
+        .item-info { flex: 1; }
+        .item-title { font-weight: 600; font-size: 15px; }
+        .item-sub { font-size: 13px; color: var(--text-secondary); }
+
+        /* Браузер Баннер */
+        .browser-banner { margin: 0 16px 20px; border-radius: var(--card-radius); background: linear-gradient(135deg, #ff9a44, #fc6076); padding: 20px; }
+        .banner-title { font-size: 22px; font-weight: 800; }
+
+        /* Нижнее меню */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 15, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around;
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); cursor: pointer; width: 25%; }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 20px; }
+        .nav-label { font-size: 11px; }
+
+        /* Модалки */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 200; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: 0.3s; }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+    </style>
 </head>
-<body class="material">
-    <div class="glass-header">
-        <div class="user-avatar">
-            <img src="https://t.me/i/userpic/320/default.png" alt="User">
-        </div>
-        <div class="tab-selector">
-            <div class="tab-slider"></div>
-            <button class="tab-item active" onclick="switchTab(this, 'crypto')">Крипто</button>
-            <button class="tab-item" onclick="switchTab(this, 'ton')">TON</button>
-        </div>
-        <div class="settings-icon">⚙️</div>
+<body>
+
+    <div class="header">
+        <div class="header-title">Tonkeeper <i class="fas fa-check-circle verified-badge"></i></div>
+        <div class="user-selector">kla1mu <i class="fas fa-chevron-down"></i></div>
+        <div class="header-actions"><i class="fas fa-times"></i></div>
     </div>
 
-    <main id="app-content">
-        <section class="balance-card" onclick="editBalance()">
-            <span class="label">Баланс</span>
-            <div class="amount-wrap">
-                <span id="int-part">1 500</span><span class="decimal">,</span><span id="fract-part">00</span><span class="currency">₽</span>
-            </div>
-            <div class="change positive">+0,00% <span>24 ч</span></div>
-        </section>
-
-        <nav class="action-bar">
-            <div class="action-item"><div class="icon-circle send"></div><span>Перевести</span></div>
-            <div class="action-item"><div class="icon-circle add"></div><span>Пополнить</span></div>
-            <div class="action-item"><div class="icon-circle up"></div><span>Вывести</span></div>
-            <div class="action-item"><div class="icon-circle swap"></div><span>Обменять</span></div>
-        </nav>
-
-        <div class="assets-list">
-            <div class="asset-item">
-                <div class="asset-icon ton"></div>
-                <div class="asset-info">
-                    <div class="name">Toncoin</div>
-                    <div class="sub">TON</div>
-                </div>
-                <div class="asset-price">0</div>
-            </div>
-            <div class="asset-item">
-                <div class="asset-icon usdt"></div>
-                <div class="asset-info">
-                    <div class="name">Доллары</div>
-                    <div class="sub">USDT</div>
-                </div>
-                <div class="asset-price">0</div>
-            </div>
-            <div class="asset-item wildcard">
-                <div class="asset-icon btc"></div>
-                <div class="asset-info">
-                    <div class="name">Bitcoin</div>
-                    <div class="sub">BTC</div>
-                </div>
-                <div class="asset-price">0</div>
+    <div id="tab-wallet" class="tab-content active">
+        <div class="balance-section">
+            <div class="balance-amount" id="mainBalance" ondblclick="editBalance()">$0</div>
+            <div class="wallet-address">UQDt...n1Jz</div>
+        </div>
+        <div class="action-buttons">
+            <div class="action-btn" onclick="openModal('modal-buy')"><div class="action-circle"><i class="fas fa-plus"></i></div><span>Buy</span></div>
+            <div class="action-btn" onclick="openModal('modal-send')"><div class="action-circle"><i class="fas fa-arrow-up"></i></div><span>Send</span></div>
+            <div class="action-btn" onclick="openModal('modal-receive')"><div class="action-circle"><i class="fas fa-arrow-down"></i></div><span>Receive</span></div>
+            <div class="action-btn" onclick="openModal('modal-swap')"><div class="action-circle"><i class="fas fa-exchange-alt"></i></div><span>Swap</span></div>
+        </div>
+        <div class="list-container">
+            <div class="list-item">
+                <div class="item-icon" style="background: #0098ea;"><i class="fab fa-telegram" style="color:#fff"></i></div>
+                <div class="item-info"><div class="item-title">TON</div><div class="item-sub">0 TON</div></div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <script src="app.js"></script>
+    <div id="tab-history" class="tab-content">
+        <div style="text-align:center; margin-top:100px; color:var(--text-secondary)">
+            <p>No transactions yet</p>
+        </div>
+    </div>
+
+    <div id="tab-browser" class="tab-content">
+        <div class="browser-banner">
+            <div class="banner-title">STARS</div>
+            <p>Save 25% on Telegram Stars</p>
+        </div>
+    </div>
+
+    <div id="tab-settings" class="tab-content">
+        <div class="list-container">
+            <div class="list-item"><div class="item-info"><div class="item-title">Currency</div></div><span style="color:var(--accent)">USD</span></div>
+            <div class="list-item" style="color:var(--danger); justify-content:center" onclick="alert('Deleted')">Delete Account</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('wallet', this)"><i class="fas fa-wallet nav-icon"></i><span class="nav-label">Wallet</span></div>
+        <div class="nav-item" onclick="switchTab('history', this)"><i class="fas fa-bolt nav-icon"></i><span class="nav-label">History</span></div>
+        <div class="nav-item" onclick="switchTab('browser', this)"><i class="fas fa-compass nav-icon"></i><span class="nav-label">Browser</span></div>
+        <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cog nav-icon"></i><span class="nav-label">Settings</span></div>
+    </div>
+
+    <div class="modal-overlay" id="modal-buy" onclick="this.classList.remove('show')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom:15px">Buy Toncoin</h3>
+            <p style="color:var(--text-secondary)">Choose provider...</p>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function switchTab(tabId, element) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            // Прячем все вкладки
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            // Снимаем выделение с кнопок
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Показываем нужную
+            document.getElementById('tab-' + tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function editBalance() {
+            const val = prompt("New balance:", "0");
+            if (val !== null) document.getElementById('mainBalance').innerText = "$" + val;
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+    </script>
 </body>
 </html>
