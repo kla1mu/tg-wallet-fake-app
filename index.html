@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tonkeeper</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Tonkeeper Clone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
+            /* Цветовая палитра Tonkeeper Dark */
             --bg-primary: #0a0f14;
             --bg-secondary: #1c2630;
             --text-primary: #ffffff;
@@ -36,7 +37,7 @@
             -webkit-user-select: none;
         }
 
-        /* HEADER (БЕЗ КРЕСТИКА) */
+        /* --- HEADER (БЕЗ КРЕСТИКА) --- */
         .header {
             padding: 12px 16px;
             display: flex;
@@ -47,7 +48,7 @@
             background-color: var(--bg-primary);
             z-index: 10;
         }
-        .header-left { display: flex; align-items: center; gap: 4px; font-size: 17px; font-weight: 700; }
+        .header-left { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
         .verified-badge { color: var(--accent); font-size: 14px; }
         .user-selector { 
             position: absolute; left: 50%; transform: translateX(-50%); 
@@ -57,40 +58,19 @@
         }
         .header-right { font-size: 20px; color: var(--text-secondary); cursor: pointer; }
 
-        /* ТАБЫ ВНУТРИ КОШЕЛЬКА (Tokens / NFTs) */
-        .wallet-sub-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-bottom: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .sub-tab {
-            padding: 8px 0;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        .sub-tab.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--text-primary);
-        }
-
-        /* ОСНОВНОЙ КОНТЕНТ ВКЛАДОК */
+        /* --- ТАБЫ КОНТЕНТА --- */
         .tab-content {
             display: none;
-            padding-bottom: 100px;
+            padding-bottom: 100px; /* Место под Dock */
             animation: fadeIn 0.2s ease;
         }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* БАЛАНС */
+        /* --- ВКЛАДКА WALLET --- */
         .balance-section { text-align: center; margin: 24px 0 32px; }
         .balance-amount { font-size: 48px; font-weight: 800; margin-bottom: 4px; letter-spacing: -1px; }
-        .wallet-address { font-size: 13px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; display: inline-block; }
+        .wallet-address { font-size: 13px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; display: inline-block; font-family: monospace; }
 
         /* КНОПКИ ДЕЙСТВИЙ */
         .action-buttons { display: flex; justify-content: space-evenly; padding: 0 16px; margin-bottom: 32px; }
@@ -99,19 +79,26 @@
         .action-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; font-size: 22px; color: var(--accent); }
         .action-btn span { font-size: 13px; font-weight: 500; }
 
+        /* ТАБЫ ТОКЕНОВ/NFT */
+        .wallet-sub-tabs { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sub-tab { padding: 8px 0; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; }
+        .sub-tab.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+
         /* СПИСОК ТОКЕНОВ */
         .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 12px; overflow: hidden; }
-        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
+        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .list-item:active { background: rgba(255,255,255,0.05); }
         .list-item:last-child { border-bottom: none; }
+        
         .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .item-icon img { width: 100%; height: 100%; object-fit: cover; }
+        
         .item-info { flex: 1; }
-        .item-title { font-weight: 600; font-size: 16px; }
+        .item-title { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
         .item-sub { font-size: 14px; color: var(--text-secondary); }
         .item-value { text-align: right; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ (DOCK) */
+        /* --- НИЖНЯЯ ПАНЕЛЬ (DOCK) --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: rgba(10, 15, 20, 0.98);
@@ -126,7 +113,7 @@
         .nav-icon { font-size: 20px; }
         .nav-label { font-size: 10px; font-weight: 600; }
 
-        /* МОДАЛКА */
+        /* --- МОДАЛЬНОЕ ОКНО --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; z-index: 200; }
         .modal-overlay.show { display: flex; }
         .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px; transform: translateY(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -161,7 +148,7 @@
 
         <div class="list-container">
             <div class="list-item">
-                <div class="item-icon" style="background: #0098ea;"><i class="fab fa-telegram" style="color:#fff; font-size: 24px;"></i></div>
+                <div class="item-icon" style="background: #0098ea;"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON"></div>
                 <div class="item-info"><div class="item-title">TON</div><div class="item-sub">$5.24</div></div>
                 <div class="item-value"><div class="item-title">0</div><div class="item-sub">$0</div></div>
             </div>
@@ -177,31 +164,7 @@
         <div style="text-align:center; margin-top:120px; color:var(--text-secondary); padding: 0 40px;">
             <i class="fas fa-clock" style="font-size: 48px; margin-bottom: 16px; opacity: 0.2;"></i>
             <h3 style="color: #fff; margin-bottom: 8px;">No transactions</h3>
-            <p>Your transaction history will appear here once you start using the wallet.</p>
-        </div>
-    </div>
-
-    <div id="tab-browser" class="tab-content">
-        <div style="padding: 16px;">
-            <div style="background: linear-gradient(135deg, #0098ea, #00c6ff); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
-                <h2 style="font-weight: 800; margin-bottom: 8px;">STAKING</h2>
-                <p style="font-size: 14px; opacity: 0.9;">Earn up to 4.5% APR on your TON</p>
-            </div>
-            <h3 style="margin-bottom: 12px; font-size: 18px;">Recommended</h3>
-            <div class="list-container" style="margin: 0;">
-                <div class="list-item"><div class="item-info"><div class="item-title">Ston.fi</div><div class="item-sub">DEX on TON</div></div><i class="fas fa-chevron-right"></i></div>
-                <div class="list-item"><div class="item-info"><div class="item-title">Fragment</div><div class="item-sub">Usernames & Numbers</div></div><i class="fas fa-chevron-right"></i></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="tab-settings" class="tab-content">
-        <div class="list-container">
-            <div class="list-item"><div class="item-info">Recovery Phrase</div><i class="fas fa-chevron-right"></i></div>
-            <div class="list-item"><div class="item-info">Currency</div><span style="color:var(--accent)">USD</span></div>
-        </div>
-        <div class="list-container">
-            <div class="list-item" style="color: var(--danger); justify-content: center; font-weight: 700;">Sign Out</div>
+            <p>Your history will appear here once you start using the wallet.</p>
         </div>
     </div>
 
@@ -226,32 +189,14 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        // Включаем подтверждение при закрытии, чтобы не выйти случайно
         tg.enableClosingConfirmation();
 
-        function triggerHaptic(style) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
-        }
-
-        function switchTab(tabId, element) {
-            triggerHaptic('light');
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        function openModal(id) {
-            triggerHaptic('medium');
-            document.getElementById(id).classList.add('show');
-        }
-
-        function editBalance() {
-            triggerHaptic('selection_change');
-            const val = prompt("Enter balance amount ($):", "1000");
-            if (val !== null) {
-                document.getElementById('mainBalance').innerText = "$" + val.toLocaleString();
-            }
-        }
+        // Сжатый JavaScript для предотвращения глюков на GitHub Pages
+        function triggerHaptic(s){if(tg.HapticFeedback)tg.HapticFeedback.impactOccurred(s)}
+        function switchTab(tId,e){triggerHaptic('light');document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('tab-'+tId).classList.add('active');e.classList.add('active')}
+        function openModal(id){triggerHaptic('medium');document.getElementById(id).classList.add('show')}
+        function editBalance(){triggerHaptic('selection_change');const v=prompt("New balance ($):","1000");if(v!==null){document.getElementById('mainBalance').innerText="$"+v.toLocaleString();}}
     </script>
 </body>
 </html>
