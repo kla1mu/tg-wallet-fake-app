@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tonkeeper Clone</title>
+    <title>Tonkeeper</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -22,7 +22,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -36,9 +36,9 @@
             -webkit-user-select: none;
         }
 
-        /* HEADER */
+        /* HEADER (БЕЗ КРЕСТИКА) */
         .header {
-            padding: 16px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -47,71 +47,98 @@
             background-color: var(--bg-primary);
             z-index: 10;
         }
-        .header-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .verified-badge { color: var(--text-secondary); font-size: 14px; }
-        .user-selector { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px; font-weight: 600; }
+        .header-left { display: flex; align-items: center; gap: 4px; font-size: 17px; font-weight: 700; }
+        .verified-badge { color: var(--accent); font-size: 14px; }
+        .user-selector { 
+            position: absolute; left: 50%; transform: translateX(-50%); 
+            display: flex; align-items: center; gap: 4px; cursor: pointer; 
+            font-size: 15px; font-weight: 600; background: rgba(255,255,255,0.05);
+            padding: 4px 12px; border-radius: 20px;
+        }
+        .header-right { font-size: 20px; color: var(--text-secondary); cursor: pointer; }
 
-        /* Вкладки */
+        /* ТАБЫ ВНУТРИ КОШЕЛЬКА (Tokens / NFTs) */
+        .wallet-sub-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .sub-tab {
+            padding: 8px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .sub-tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+
+        /* ОСНОВНОЙ КОНТЕНТ ВКЛАДОК */
         .tab-content {
             display: none;
             padding-bottom: 100px;
             animation: fadeIn 0.2s ease;
         }
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Кошелек */
-        .balance-section { text-align: center; margin: 30px 0 40px; }
-        .balance-amount { font-size: 44px; font-weight: 700; margin-bottom: 8px; cursor: pointer; }
-        .wallet-address { font-size: 13px; color: var(--text-secondary); font-family: monospace; }
+        /* БАЛАНС */
+        .balance-section { text-align: center; margin: 24px 0 32px; }
+        .balance-amount { font-size: 48px; font-weight: 800; margin-bottom: 4px; letter-spacing: -1px; }
+        .wallet-address { font-size: 13px; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; display: inline-block; }
 
-        .action-buttons { display: flex; justify-content: space-around; padding: 0 16px; margin-bottom: 32px; }
-        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .action-circle { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; justify-content: center; align-items: center; font-size: 20px; }
-        .action-btn span { font-size: 12px; }
+        /* КНОПКИ ДЕЙСТВИЙ */
+        .action-buttons { display: flex; justify-content: space-evenly; padding: 0 16px; margin-bottom: 32px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.1s; }
+        .action-btn:active { transform: scale(0.9); }
+        .action-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-secondary); display: flex; justify-content: center; align-items: center; font-size: 22px; color: var(--accent); }
+        .action-btn span { font-size: 13px; font-weight: 500; }
 
-        .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 20px; overflow: hidden; }
-        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .item-icon { width: 36px; height: 36px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .item-icon img { width: 100%; height: 100%; }
+        /* СПИСОК ТОКЕНОВ */
+        .list-container { background: var(--bg-secondary); border-radius: var(--card-radius); margin: 0 16px 12px; overflow: hidden; }
+        .list-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
+        .list-item:active { background: rgba(255,255,255,0.05); }
+        .list-item:last-child { border-bottom: none; }
+        .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .item-icon img { width: 100%; height: 100%; object-fit: cover; }
         .item-info { flex: 1; }
-        .item-title { font-weight: 600; font-size: 15px; }
-        .item-sub { font-size: 13px; color: var(--text-secondary); }
+        .item-title { font-weight: 600; font-size: 16px; }
+        .item-sub { font-size: 14px; color: var(--text-secondary); }
+        .item-value { text-align: right; }
 
-        /* Браузер Баннер */
-        .browser-banner { margin: 0 16px 20px; border-radius: var(--card-radius); background: linear-gradient(135deg, #ff9a44, #fc6076); padding: 20px; }
-        .banner-title { font-size: 22px; font-weight: 800; }
-
-        /* Нижнее меню */
+        /* НИЖНЯЯ ПАНЕЛЬ (DOCK) */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(10, 15, 20, 0.95);
+            background: rgba(10, 15, 20, 0.98);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,255,255,0.05);
             display: flex; justify-content: space-around;
-            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
             z-index: 100;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); cursor: pointer; width: 25%; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); cursor: pointer; width: 20%; }
         .nav-item.active { color: var(--accent); }
         .nav-icon { font-size: 20px; }
-        .nav-label { font-size: 11px; }
+        .nav-label { font-size: 10px; font-weight: 600; }
 
-        /* Модалки */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; z-index: 200; }
+        /* МОДАЛКА */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; z-index: 200; }
         .modal-overlay.show { display: flex; }
-        .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: 0.3s; }
+        .modal-content { background: var(--bg-secondary); width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px; transform: translateY(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .modal-overlay.show .modal-content { transform: translateY(0); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-title">Tonkeeper <i class="fas fa-check-circle verified-badge"></i></div>
-        <div class="user-selector">kla1mu <i class="fas fa-chevron-down"></i></div>
-        <div class="header-actions"><i class="fas fa-times"></i></div>
+        <div class="header-left">Tonkeeper <i class="fas fa-check-circle verified-badge"></i></div>
+        <div class="user-selector" onclick="triggerHaptic('light')">kla1mu <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i></div>
+        <div class="header-right"><i class="fas fa-cog"></i></div>
     </div>
 
     <div id="tab-wallet" class="tab-content active">
@@ -119,37 +146,62 @@
             <div class="balance-amount" id="mainBalance" ondblclick="editBalance()">$0</div>
             <div class="wallet-address">UQDt...n1Jz</div>
         </div>
+
         <div class="action-buttons">
             <div class="action-btn" onclick="openModal('modal-buy')"><div class="action-circle"><i class="fas fa-plus"></i></div><span>Buy</span></div>
             <div class="action-btn" onclick="openModal('modal-send')"><div class="action-circle"><i class="fas fa-arrow-up"></i></div><span>Send</span></div>
             <div class="action-btn" onclick="openModal('modal-receive')"><div class="action-circle"><i class="fas fa-arrow-down"></i></div><span>Receive</span></div>
             <div class="action-btn" onclick="openModal('modal-swap')"><div class="action-circle"><i class="fas fa-exchange-alt"></i></div><span>Swap</span></div>
         </div>
+
+        <div class="wallet-sub-tabs">
+            <div class="sub-tab active">Tokens</div>
+            <div class="sub-tab">NFTs</div>
+        </div>
+
         <div class="list-container">
             <div class="list-item">
-                <div class="item-icon" style="background: #0098ea;"><i class="fab fa-telegram" style="color:#fff"></i></div>
-                <div class="item-info"><div class="item-title">TON</div><div class="item-sub">0 TON</div></div>
+                <div class="item-icon" style="background: #0098ea;"><i class="fab fa-telegram" style="color:#fff; font-size: 24px;"></i></div>
+                <div class="item-info"><div class="item-title">TON</div><div class="item-sub">$5.24</div></div>
+                <div class="item-value"><div class="item-title">0</div><div class="item-sub">$0</div></div>
+            </div>
+            <div class="list-item">
+                <div class="item-icon"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT"></div>
+                <div class="item-info"><div class="item-title">USDT</div><div class="item-sub">Tether</div></div>
+                <div class="item-value"><div class="item-title">0</div><div class="item-sub">$0</div></div>
             </div>
         </div>
     </div>
 
     <div id="tab-history" class="tab-content">
-        <div style="text-align:center; margin-top:100px; color:var(--text-secondary)">
-            <p>No transactions yet</p>
+        <div style="text-align:center; margin-top:120px; color:var(--text-secondary); padding: 0 40px;">
+            <i class="fas fa-clock" style="font-size: 48px; margin-bottom: 16px; opacity: 0.2;"></i>
+            <h3 style="color: #fff; margin-bottom: 8px;">No transactions</h3>
+            <p>Your transaction history will appear here once you start using the wallet.</p>
         </div>
     </div>
 
     <div id="tab-browser" class="tab-content">
-        <div class="browser-banner">
-            <div class="banner-title">STARS</div>
-            <p>Save 25% on Telegram Stars</p>
+        <div style="padding: 16px;">
+            <div style="background: linear-gradient(135deg, #0098ea, #00c6ff); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                <h2 style="font-weight: 800; margin-bottom: 8px;">STAKING</h2>
+                <p style="font-size: 14px; opacity: 0.9;">Earn up to 4.5% APR on your TON</p>
+            </div>
+            <h3 style="margin-bottom: 12px; font-size: 18px;">Recommended</h3>
+            <div class="list-container" style="margin: 0;">
+                <div class="list-item"><div class="item-info"><div class="item-title">Ston.fi</div><div class="item-sub">DEX on TON</div></div><i class="fas fa-chevron-right"></i></div>
+                <div class="list-item"><div class="item-info"><div class="item-title">Fragment</div><div class="item-sub">Usernames & Numbers</div></div><i class="fas fa-chevron-right"></i></div>
+            </div>
         </div>
     </div>
 
     <div id="tab-settings" class="tab-content">
         <div class="list-container">
-            <div class="list-item"><div class="item-info"><div class="item-title">Currency</div></div><span style="color:var(--accent)">USD</span></div>
-            <div class="list-item" style="color:var(--danger); justify-content:center" onclick="alert('Deleted')">Delete Account</div>
+            <div class="list-item"><div class="item-info">Recovery Phrase</div><i class="fas fa-chevron-right"></i></div>
+            <div class="list-item"><div class="item-info">Currency</div><span style="color:var(--accent)">USD</span></div>
+        </div>
+        <div class="list-container">
+            <div class="list-item" style="color: var(--danger); justify-content: center; font-weight: 700;">Sign Out</div>
         </div>
     </div>
 
@@ -162,35 +214,43 @@
 
     <div class="modal-overlay" id="modal-buy" onclick="this.classList.remove('show')">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 style="margin-bottom:15px">Buy Toncoin</h3>
-            <p style="color:var(--text-secondary)">Choose provider...</p>
+            <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 0 auto 20px;"></div>
+            <h2 style="margin-bottom: 16px;">Buy Toncoin</h2>
+            <div class="list-container" style="margin: 0;">
+                <div class="list-item"><div class="item-info">Mercuryo</div><i class="fas fa-external-link-alt"></i></div>
+                <div class="list-item"><div class="item-info">Neocrypto</div><i class="fas fa-external-link-alt"></i></div>
+            </div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.enableClosingConfirmation();
+
+        function triggerHaptic(style) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style);
+        }
 
         function switchTab(tabId, element) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            // Прячем все вкладки
+            triggerHaptic('light');
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            // Снимаем выделение с кнопок
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // Показываем нужную
             document.getElementById('tab-' + tabId).classList.add('active');
             element.classList.add('active');
         }
 
-        function editBalance() {
-            const val = prompt("New balance:", "0");
-            if (val !== null) document.getElementById('mainBalance').innerText = "$" + val;
+        function openModal(id) {
+            triggerHaptic('medium');
+            document.getElementById(id).classList.add('show');
         }
 
-        function openModal(id) {
-            document.getElementById(id).classList.add('show');
+        function editBalance() {
+            triggerHaptic('selection_change');
+            const val = prompt("Enter balance amount ($):", "1000");
+            if (val !== null) {
+                document.getElementById('mainBalance').innerText = "$" + val.toLocaleString();
+            }
         }
     </script>
 </body>
