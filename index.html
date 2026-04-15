@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -8,37 +8,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #0a0f14; --card: #1c2630; --text: #fff; --sub: #708499; --accent: #0098ea; }
+        :root { 
+            --bg: #0a0f14; 
+            --card: #1c2630; 
+            --text: #fff; 
+            --sub: #708499; 
+            --accent: #0098ea; 
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Шапка */
+        /* Header */
         .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
         .user-selector { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 
-        /* Баланс */
+        /* Balance Section */
         .balance-section { text-align: center; margin: 20px 0; cursor: pointer; }
-        .balance-amount { font-size: 48px; font-weight: 900; letter-spacing: -2.5px; display: flex; justify-content: center; align-items: baseline; }
+        .balance-amount { 
+            font-size: 48px; 
+            font-weight: 900; 
+            letter-spacing: -2.5px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: baseline; 
+        }
         .balance-amount span { font-size: 40px; margin-right: 2px; font-weight: 800; }
-        .wallet-address { font-size: 12px; color: var(--sub); background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; margin-top: 5px; display: inline-block; font-family: monospace; }
+        .wallet-address { font-size: 12px; color: var(--sub); background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; margin-top: 5px; display: inline-block; }
 
-        /* Кнопки действий */
+        /* Action Buttons */
         .actions { display: flex; justify-content: space-around; padding: 0 10px; margin-bottom: 25px; }
         .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
         .icon-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent); }
 
-        /* Список токенов */
+        /* Asset List */
         .list { background: var(--card); border-radius: 16px; margin: 0 16px; overflow: hidden; }
         .item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .item:last-child { border-bottom: none; }
-        .item-img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; background: #000; }
+        .item-img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
         .item-info { flex: 1; }
         .item-name { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
         .item-sub { font-size: 13px; color: var(--sub); }
         .item-val { text-align: right; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* Навигация */
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); background: rgba(10,15,20,0.98); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); }
+        /* Bottom Navigation */
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); background: rgba(10,15,20,0.98); border-top: 1px solid rgba(255,255,255,0.05); }
         .nav-item { color: var(--sub); text-align: center; font-size: 10px; font-weight: 700; width: 25%; }
         .nav-item.active { color: var(--accent); }
         .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
@@ -57,10 +69,10 @@
     </div>
 
     <div class="actions">
-        <div class="action-btn" onclick="tgHaptic('medium')"><div class="icon-circle"><i class="fas fa-plus"></i></div>Buy</div>
-        <div class="action-btn" onclick="tgHaptic('medium')"><div class="icon-circle"><i class="fas fa-arrow-up"></i></div>Send</div>
-        <div class="action-btn" onclick="tgHaptic('medium')"><div class="icon-circle"><i class="fas fa-arrow-down"></i></div>Receive</div>
-        <div class="action-btn" onclick="tgHaptic('medium')"><div class="icon-circle"><i class="fas fa-exchange-alt"></i></div>Swap</div>
+        <div class="action-btn"><div class="icon-circle"><i class="fas fa-plus"></i></div>Buy</div>
+        <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-up"></i></div>Send</div>
+        <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-down"></i></div>Receive</div>
+        <div class="action-btn"><div class="icon-circle"><i class="fas fa-exchange-alt"></i></div>Swap</div>
     </div>
 
     <div class="list">
@@ -87,23 +99,25 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        window.tgHaptic = (s) => { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(s); };
-
         window.editBalance = () => {
-            window.tgHaptic('light');
-            let v = prompt("Введите общую сумму ($):");
+            let v = prompt("Введите сумму ($):");
             if (!v) return;
             let total = parseFloat(v.replace(/\s/g, '').replace(',', '.'));
             if (isNaN(total)) return;
 
-            // Расчет (25% TON, 75% USDT)
+            // Расчет долей (25% TON, 75% USDT)
             let tonPart = total * 0.25;
             let usdtPart = total * 0.75;
+            let tonPrice = 5.24;
             
-            // Обновление интерфейса
+            // Обновление главного баланса
             document.getElementById('mainB').innerHTML = `<span>$</span>${total.toLocaleString('ru-RU').replace(/\s/g, ' ')}`;
-            document.getElementById('tC').innerText = (tonPart / 5.24).toFixed(2);
+            
+            // Обновление TON
+            document.getElementById('tC').innerText = (tonPart / tonPrice).toFixed(2);
             document.getElementById('tF').innerText = "$" + tonPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
+            
+            // Обновление USDT
             document.getElementById('uC').innerText = usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
             document.getElementById('uF').innerText = "$" + usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
 
