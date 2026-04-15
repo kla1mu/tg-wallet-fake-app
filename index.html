@@ -3,86 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tonkeeper</title>
+    <title>Tonkeeper Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #0a0f14; --card: #1c2630; --text: #fff; --sub: #708499; --accent: #0098ea; }
+        :root { --bg: #0a0f14; --card: #1c2630; --text: #fff; --sub: #708499; --accent: #0098ea; --success: #4cd964; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
-        .user-selector { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+        .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .user-selector { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 
-        .balance-section { text-align: center; margin: 20px 0; cursor: pointer; padding: 10px; z-index: 5; position: relative; }
+        /* Табы */
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.2s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Баланс */
+        .balance-section { text-align: center; margin: 20px 0; cursor: pointer; }
         .balance-amount { font-size: 48px; font-weight: 900; letter-spacing: -2.5px; display: flex; justify-content: center; align-items: baseline; }
         .balance-amount span { font-size: 40px; margin-right: 2px; }
-        .wallet-address { font-size: 12px; color: var(--sub); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 8px; margin-top: 5px; display: inline-block; }
 
+        /* Кнопки */
         .actions { display: flex; justify-content: space-around; padding: 0 10px; margin-bottom: 25px; }
-        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text); }
         .icon-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent); }
 
-        .list { background: var(--card); border-radius: 16px; margin: 0 16px; overflow: hidden; }
+        /* Список */
+        .list { background: var(--card); border-radius: 16px; margin: 0 16px 15px; overflow: hidden; }
         .item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .item-img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
+        .item-icon { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
         .item-info { flex: 1; }
         .item-name { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
         .item-sub { font-size: 13px; color: var(--sub); }
         .item-val { text-align: right; font-weight: 700; letter-spacing: -0.5px; }
+        .status-up { color: var(--success); }
 
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0 30px; background: rgba(10,15,20,0.98); border-top: 1px solid rgba(255,255,255,0.05); }
-        .nav-item { color: var(--sub); text-align: center; font-size: 10px; font-weight: 700; width: 25%; }
+        /* Навигация */
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0 30px; background: rgba(10,15,20,0.98); border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; }
+        .nav-item { color: var(--sub); text-align: center; font-size: 10px; font-weight: 700; width: 25%; transition: 0.2s; }
         .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <div style="font-weight:800">Tonkeeper <i class="fas fa-check-circle" style="color:var(--accent)"></i></div>
-        <div class="user-selector">kla1mu <i class="fas fa-chevron-down" style="font-size:10px"></i></div>
-        <i class="fas fa-cog" style="color:var(--sub)"></i>
+        <div style="font-weight:800; font-size: 17px;">Tonkeeper <i class="fas fa-check-circle" style="color:var(--accent); font-size: 14px;"></i></div>
+        <div class="user-selector">kla1mu <i class="fas fa-chevron-down" style="font-size:10px; opacity: 0.5;"></i></div>
+        <i class="fas fa-cog" style="color:var(--sub); font-size: 20px;"></i>
     </div>
 
-    <div class="balance-section" id="editTrigger">
-        <div class="balance-amount" id="mainB"><span>$</span>0</div>
-        <div class="wallet-address">UQDt...n1Jz</div>
-    </div>
-
-    <div class="actions">
-        <div class="action-btn"><div class="icon-circle"><i class="fas fa-plus"></i></div>Buy</div>
-        <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-up"></i></div>Send</div>
-        <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-down"></i></div>Receive</div>
-        <div class="action-btn"><div class="icon-circle"><i class="fas fa-exchange-alt"></i></div>Swap</div>
-    </div>
-
-    <div class="list">
-        <div class="item">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAM1BMVEVHcEygp7SgrLWfs7mhrbmpuL6qur+sur+vur+wu7+xvL+xvL+yvb+zvr+0v7+1wL+2wb98m9pBAAAADHRSTlMA789fX19fX19fX18TdfYnAAAAi0lEQVRIx+3V2w6EIAwF0SqiIn7//7XtoKAs6mSSTfS9mS9tT4CAtXpIKfUnIuS6XmKAnP9K4N0ArvIBrvIBrvIBrvIBYvR0H0M/9YI89YI09YM09XpBnnq9IE+9XpCnXpCnnk8Z9SliPmXUp4j5lFGfIuZT9j6tP0/pT8yYmBExE8SYCRvEnAk7xJwJK8Sc6Xp68wEshgM9PByA6AAAAABJRU5ErkJggg==" class="item-img" alt="TON">
-            <div class="item-info"><div class="item-name">TON</div><div class="item-sub">$5.24</div></div>
-            <div class="item-val"><div id="tC">0</div><div class="item-sub" id="tF">$0</div></div>
+    <div id="wallet" class="tab-content active">
+        <div class="balance-section" onclick="editBalance()">
+            <div class="balance-amount" id="mainB"><span>$</span>0</div>
+            <div style="font-size:12px; color:var(--sub); background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:8px; margin-top:5px; display:inline-block;">UQDt...n1Jz</div>
         </div>
-        <div class="item">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAM1BMVEVHcEyytr2yt76zub+zvL+zvr+0v7+1wL+2wb+3wr+4w7+5xL+6xb+7xr+8yL+9yb+9yr9U7M3LAAAACHSTlMA789fX19fX0Y2F2wAAACLSURBVDjH7dbZDsIgEAVQK9Z9X///W9uAgaIsSZrE92ZOnskkAhZp2ZBS6m9E6H2/xAD79EnCdgBf5QNc5QNc5QNc5QPE7NUxhX7qhXjqBWnqhTT1ekGeer0gT71ekKdeL8hTr2fM+Yw5nzHnM+Z8xpzPmPMZ+5yxnzH7MxZkzMiYGRtkzA0bZMwNG2TMDRtkzPV2evUBrFMDPS8XN70AAAAASUVORK5CYII=" class="item-img" alt="USDT">
-            <div class="item-info"><div class="item-name">USDT</div><div class="item-sub">Tether</div></div>
-            <div class="item-val"><div id="uC">0</div><div class="item-sub" id="uF">$0</div></div>
+
+        <div class="actions">
+            <div class="action-btn"><div class="icon-circle"><i class="fas fa-plus"></i></div>Buy</div>
+            <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-up"></i></div>Send</div>
+            <div class="action-btn"><div class="icon-circle"><i class="fas fa-arrow-down"></i></div>Receive</div>
+            <div class="action-btn"><div class="icon-circle"><i class="fas fa-exchange-alt"></i></div>Swap</div>
+        </div>
+
+        <div class="list">
+            <div class="item">
+                <div class="item-icon">
+                    <svg viewBox="0 0 100 100" width="40"><circle cx="50" cy="50" r="50" fill="#0098ea"/><path d="M30 40c0-10 5-15 15-15h10c10 0 15 5 15 15v20c0 10-5 15-15 15H45c-10 0-15-5-15-15V40z" fill="none" stroke="#fff" stroke-width="6"/><path d="M42 45h16M42 55h16" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+                </div>
+                <div class="item-info"><div class="item-name">TON</div><div class="item-sub">$5.24</div></div>
+                <div class="item-val"><div id="tC">0</div><div class="item-sub" id="tF">$0</div></div>
+            </div>
+            <div class="item">
+                <div class="item-icon">
+                    <svg viewBox="0 0 100 100" width="40"><circle cx="50" cy="50" r="50" fill="#26a17b"/><path d="M35 40h30M50 40v35M40 75h20" stroke="#fff" stroke-width="7" stroke-linecap="round"/><ellipse cx="50" cy="40" rx="20" ry="10" fill="none" stroke="#fff" stroke-width="6"/></svg>
+                </div>
+                <div class="item-info"><div class="item-name">USDT</div><div class="item-sub">Tether</div></div>
+                <div class="item-val"><div id="uC">0</div><div class="item-sub" id="uF">$0</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="history" class="tab-content">
+        <div style="padding: 20px 16px; font-weight: 800; font-size: 22px;">History</div>
+        <div class="list">
+            <div class="item">
+                <div class="item-icon" style="background:#222; display:flex; align-items:center; justify-content:center; color:var(--success)"><i class="fas fa-arrow-down"></i></div>
+                <div class="item-info"><div class="item-name">Received</div><div class="item-sub">From UQBy...82x</div></div>
+                <div class="item-val"><div class="status-up" id="histTon">+0 TON</div><div class="item-sub" id="histFiat">+$0</div></div>
+            </div>
         </div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active"><i class="fas fa-wallet" style="font-size:20px"></i><br>Wallet</div>
-        <div class="nav-item"><i class="fas fa-bolt" style="font-size:20px"></i><br>History</div>
-        <div class="nav-item"><i class="fas fa-compass" style="font-size:20px"></i><br>Browser</div>
-        <div class="nav-item"><i class="fas fa-cog" style="font-size:20px"></i><br>Settings</div>
+        <div class="nav-item active" onclick="showTab('wallet', this)"><i class="fas fa-wallet"></i>Wallet</div>
+        <div class="nav-item" onclick="showTab('history', this)"><i class="fas fa-bolt"></i>History</div>
+        <div class="nav-item"><i class="fas fa-compass"></i>Browser</div>
+        <div class="nav-item"><i class="fas fa-cog"></i>Settings</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        document.getElementById('editTrigger').onclick = function() {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
+        function showTab(id, el) {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        window.editBalance = () => {
             let v = prompt("Сумма ($):");
             if (!v) return;
             let total = parseFloat(v.replace(/\s/g, '').replace(',', '.'));
@@ -90,15 +124,24 @@
 
             let tonPart = total * 0.25;
             let usdtPart = total * 0.75;
-            let tonPrice = 5.24;
+            let tCount = (tonPart / 5.24).toFixed(2);
+            
+            let fTotal = total.toLocaleString('ru-RU').replace(/\s/g, ' ');
+            let fTonP = tonPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
+            let fUsdtP = usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
 
-            document.getElementById('mainB').innerHTML = `<span>$</span>${total.toLocaleString('ru-RU').replace(/\s/g, ' ')}`;
-            document.getElementById('tC').innerText = (tonPart / tonPrice).toFixed(2);
-            document.getElementById('tF').innerText = "$" + tonPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
-            document.getElementById('uC').innerText = usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
-            document.getElementById('uF').innerText = "$" + usdtPart.toLocaleString('ru-RU').replace(/\s/g, ' ');
+            // Обновляем кошелек
+            document.getElementById('mainB').innerHTML = `<span>$</span>${fTotal}`;
+            document.getElementById('tC').innerText = tCount;
+            document.getElementById('tF').innerText = "$" + fTonP;
+            document.getElementById('uC').innerText = fUsdtP;
+            document.getElementById('uF').innerText = "$" + fUsdtP;
 
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            // Обновляем историю (для красоты)
+            document.getElementById('histTon').innerText = `+${tCount} TON`;
+            document.getElementById('histFiat').innerText = `+$${fTonP}`;
+
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         };
     </script>
 </body>
