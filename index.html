@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru" style="--tg-viewport-height: 100vh;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Wallet</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="material">
+    <div class="glass-header">
+        <div class="user-avatar">
+            <img src="https://t.me/i/userpic/320/default.png" alt="User">
+        </div>
+        <div class="tab-selector">
+            <div class="tab-slider"></div>
+            <button class="tab-item active" onclick="switchTab(this, 'crypto')">Крипто</button>
+            <button class="tab-item" onclick="switchTab(this, 'ton')">TON</button>
+        </div>
+        <div class="settings-icon">⚙️</div>
+    </div>
+
+    <main id="app-content">
+        <section class="balance-card" onclick="editBalance()">
+            <span class="label">Баланс</span>
+            <div class="amount-wrap">
+                <span id="int-part">1 500</span><span class="decimal">,</span><span id="fract-part">00</span><span class="currency">₽</span>
+            </div>
+            <div class="change positive">+0,00% <span>24 ч</span></div>
+        </section>
+
+        <nav class="action-bar">
+            <div class="action-item"><div class="icon-circle send"></div><span>Перевести</span></div>
+            <div class="action-item"><div class="icon-circle add"></div><span>Пополнить</span></div>
+            <div class="action-item"><div class="icon-circle up"></div><span>Вывести</span></div>
+            <div class="action-item"><div class="icon-circle swap"></div><span>Обменять</span></div>
+        </nav>
+
+        <div class="assets-list">
+            <div class="asset-item">
+                <div class="asset-icon ton"></div>
+                <div class="asset-info">
+                    <div class="name">Toncoin</div>
+                    <div class="sub">TON</div>
+                </div>
+                <div class="asset-price">0</div>
+            </div>
+            <div class="asset-item">
+                <div class="asset-icon usdt"></div>
+                <div class="asset-info">
+                    <div class="name">Доллары</div>
+                    <div class="sub">USDT</div>
+                </div>
+                <div class="asset-price">0</div>
+            </div>
+            <div class="asset-item wildcard">
+                <div class="asset-icon btc"></div>
+                <div class="asset-info">
+                    <div class="name">Bitcoin</div>
+                    <div class="sub">BTC</div>
+                </div>
+                <div class="asset-price">0</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
